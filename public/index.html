@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Panel sencillo para administrar productos e inventario de una botica."
+    />
+    <title>Inventario de botica</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/js/inventario-vista.js"></script>
+    <script type="module" src="/js/ventas-vista.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegación principal">
+        <a class="brand" href="/" aria-label="Botica Nova Salud, inicio">
+          <span class="brand-mark" aria-hidden="true">+</span>
+          <span>Nova Salud<small>Gestión de botica</small></span>
+        </a>
+        <nav>
+          <a class="nav-link active" href="#inventario" data-vista="inventario" aria-current="page">
+            <span aria-hidden="true">▦</span> Inventario
+          </a>
+          <a class="nav-link" href="#ventas" data-vista="ventas">
+            <span aria-hidden="true">↗</span> Ventas
+          </a>
+        </nav>
+        <div class="sidebar-note">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span>Datos temporales<small>Se reinician al apagar el servidor</small></span>
+        </div>
+      </aside>
+
+      <main class="main-content" id="inventario">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">PANEL DE ADMINISTRACIÓN</p>
+            <h1 id="page-title">Inventario de botica</h1>
+            <p class="subtitle" id="page-subtitle">Controla tus productos y revisa qué necesitas reponer.</p>
+          </div>
+          <div class="user-badge" aria-label="Usuario administrador">A</div>
+        </header>
+
+        <div id="vista-inventario">
+        <section class="summary-grid" aria-label="Resumen del inventario">
+          <article class="summary-card">
+            <span class="summary-icon violet" aria-hidden="true">▦</span>
+            <div><p>Productos registrados</p><strong id="total-productos">—</strong></div>
+          </article>
+          <article class="summary-card">
+            <span class="summary-icon amber" aria-hidden="true">!</span>
+            <div><p>Por reponer</p><strong id="productos-bajos">—</strong></div>
+          </article>
+          <article class="summary-card">
+            <span class="summary-icon green" aria-hidden="true">S/</span>
+            <div><p>Valor del inventario</p><strong id="valor-inventario">—</strong></div>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <section class="panel products-panel" aria-labelledby="products-heading">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">CATÁLOGO</p>
+                <h2 id="products-heading">Productos</h2>
+              </div>
+              <span class="count-pill" id="conteo-tabla">0 productos</span>
+            </div>
+            <label class="search-box" for="buscar-producto">
+              <span aria-hidden="true">⌕</span>
+              <input
+                id="buscar-producto"
+                type="search"
+                placeholder="Buscar medicamento, concentración, marca o categoría..."
+                autocomplete="off"
+              />
+            </label>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Producto / variante</th>
+                    <th scope="col">Presentación</th>
+                    <th scope="col">Precio</th>
+                    <th scope="col">Existencias</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="lista-productos">
+                  <tr><td class="empty-state" colspan="6">Cargando inventario...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel form-panel" aria-labelledby="form-heading">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">CATÁLOGO</p>
+                <h2 id="form-heading">Agregar producto</h2>
+              </div>
+              <span class="plus-icon" aria-hidden="true">+</span>
+            </div>
+            <p class="form-intro">Completa los datos para ingresarlo al inventario.</p>
+
+            <form id="form-producto">
+              <label for="categoria">Categoría</label>
+              <select id="categoria" name="categoria" required>
+                <option value="medicamento">Medicamento</option>
+                <option value="higiene">Higiene personal</option>
+                <option value="cuidado-personal">Cuidado personal</option>
+              </select>
+
+              <label for="nombre">Nombre o principio activo</label>
+              <input id="nombre" name="nombre" type="text" placeholder="Ej. Paracetamol" maxlength="100" required />
+
+              <div class="medicine-fields">
+                <label for="concentracion">Concentración o potencia</label>
+                <input id="concentracion" name="concentracion" type="text" placeholder="Ej. 500 mg" maxlength="60" />
+
+                <label for="tipoMedicamento">Tipo de medicamento</label>
+                <select id="tipoMedicamento" name="tipoMedicamento">
+                  <option value="generico">Genérico</option>
+                  <option value="marca">De marca</option>
+                </select>
+
+                <div class="brand-field">
+                  <label for="marca">Marca</label>
+                  <input id="marca" name="marca" type="text" placeholder="Ej. Panadol" maxlength="60" />
+                </div>
+
+                <label class="check-line">
+                  <input id="usaBlisters" type="checkbox" data-opcional="true" checked />
+                  Es una presentación en tabletas o cápsulas
+                </label>
+
+                <div class="blister-fields">
+                  <div class="field-row">
+                    <div>
+                      <label for="blistersPorPaquete">Blísteres por caja/paquete</label>
+                      <input id="blistersPorPaquete" name="blistersPorPaquete" type="number" min="1" step="1" value="1" />
+                    </div>
+                    <div>
+                      <label for="unidadesPorBlister">Tabletas por blíster</label>
+                      <input id="unidadesPorBlister" name="unidadesPorBlister" type="number" min="1" step="1" value="1" />
+                    </div>
+                  </div>
+                  <p class="form-hint">Si la caja trae una tableta suelta, deja ambos valores en 1.</p>
+                </div>
+              </div>
+
+              <label for="presentacion">Presentación que controlas en stock</label>
+              <input id="presentacion" name="presentacion" type="text" list="presentaciones" placeholder="Ej. Caja, frasco, unidad" maxlength="40" required />
+              <datalist id="presentaciones">
+                <option value="Caja"></option>
+                <option value="Blíster"></option>
+                <option value="Frasco"></option>
+                <option value="Tubo"></option>
+                <option value="Unidad"></option>
+                <option value="Paquete"></option>
+              </datalist>
+
+              <div class="other-units-field" hidden>
+                <label for="unidadesPorPaquete">Unidades contenidas en cada presentación</label>
+                <input id="unidadesPorPaquete" name="unidadesPorPaquete" type="number" min="1" step="1" value="1" />
+              </div>
+
+              <div class="field-row">
+                <div>
+                  <label for="precio">Precio por presentación (S/)</label>
+                  <input id="precio" name="precio" type="number" min="0.01" step="0.01" placeholder="0.00" required />
+                </div>
+                <div>
+                  <label for="stock">Presentaciones en stock</label>
+                  <input id="stock" name="stock" type="number" min="0" step="1" placeholder="0" required />
+                </div>
+              </div>
+
+              <label for="stockMinimo">Avisarme cuando queden (presentaciones)</label>
+              <input id="stockMinimo" name="stockMinimo" type="number" min="0" step="1" value="5" required />
+              <p class="form-hint">La búsqueda agrupa las variantes por nombre, pero mantiene cada concentración y marca separada.</p>
+              <p id="mensaje" class="message" role="status" aria-live="polite"></p>
+              <button id="guardar-producto" class="primary-button" type="submit">
+                <span aria-hidden="true">+</span> Guardar producto
+              </button>
+            </form>
+          </section>
+        </section>
+        </div>
+
+        <section id="vista-ventas" class="sales-view" hidden>
+          <div class="sales-layout">
+            <section class="panel sale-catalog" aria-labelledby="sale-catalog-heading">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">PUNTO DE VENTA</p>
+                  <h2 id="sale-catalog-heading">Buscar productos</h2>
+                </div>
+                <span class="count-pill" id="sale-product-count">0 productos</span>
+              </div>
+              <label class="search-box" for="buscar-venta">
+                <span aria-hidden="true">⌕</span>
+                <input id="buscar-venta" type="search" placeholder="Nombre, concentración o marca..." autocomplete="off" />
+              </label>
+              <div id="resultados-venta" class="sale-results" aria-live="polite"></div>
+            </section>
+
+            <section class="panel cart-panel" aria-labelledby="cart-heading">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">VENTA ACTUAL</p>
+                  <h2 id="cart-heading">Carrito</h2>
+                </div>
+                <span class="count-pill" id="cart-count">0 artículos</span>
+              </div>
+              <div id="carrito-venta" class="cart-items">
+                <p class="empty-state">Busca un producto y agrégalo a la venta.</p>
+              </div>
+              <div class="sale-total">
+                <span>Total</span>
+                <strong id="venta-total">S/ 0.00</strong>
+              </div>
+              <p id="mensaje-venta" class="message" role="status" aria-live="polite"></p>
+              <button id="confirmar-venta" class="primary-button" type="button" disabled>
+                Registrar venta
+              </button>
+            </section>
+          </div>
+
+          <section class="panel history-panel" aria-labelledby="history-heading">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">MOVIMIENTOS</p>
+                <h2 id="history-heading">Ventas recientes</h2>
+              </div>
+              <span class="count-pill" id="history-count">0 ventas</span>
+            </div>
+            <div id="historial-ventas" class="sales-history">
+              <p class="empty-state">Todavía no hay ventas registradas.</p>
+            </div>
+          </section>
+        </section>
+        <footer>Nova Salud <span>·</span> Sistema de inventario</footer>
+      </main>
+    </div>
+
+    <dialog id="editar-dialog" class="dialog-panel">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">CATÁLOGO</p>
+          <h2>Editar producto</h2>
+        </div>
+        <button class="icon-button" type="button" data-cerrar-dialog aria-label="Cerrar">×</button>
+      </div>
+      <p class="form-intro">Actualiza los datos de esta presentación. Para reponer, usa “Agregar stock”.</p>
+      <form id="form-editar">
+        <input name="id" type="hidden" />
+        <label for="edit-categoria">Categoría</label>
+        <select id="edit-categoria" name="categoria" required>
+          <option value="medicamento">Medicamento</option>
+          <option value="higiene">Higiene personal</option>
+          <option value="cuidado-personal">Cuidado personal</option>
+        </select>
+        <label for="edit-nombre">Nombre o principio activo</label>
+        <input id="edit-nombre" name="nombre" type="text" maxlength="100" required />
+        <div class="medicine-fields">
+          <label for="edit-concentracion">Concentración o potencia</label>
+          <input id="edit-concentracion" name="concentracion" type="text" maxlength="60" />
+          <label for="edit-tipoMedicamento">Tipo de medicamento</label>
+          <select id="edit-tipoMedicamento" name="tipoMedicamento">
+            <option value="generico">Genérico</option>
+            <option value="marca">De marca</option>
+          </select>
+          <div class="brand-field">
+            <label for="edit-marca">Marca</label>
+            <input id="edit-marca" name="marca" type="text" maxlength="60" />
+          </div>
+          <label class="check-line">
+            <input id="edit-usaBlisters" type="checkbox" data-opcional="true" checked />
+            Es una presentación en tabletas o cápsulas
+          </label>
+          <div class="blister-fields">
+            <div class="field-row">
+              <div>
+                <label for="edit-blistersPorPaquete">Blísteres por caja/paquete</label>
+                <input id="edit-blistersPorPaquete" name="blistersPorPaquete" type="number" min="1" step="1" />
+              </div>
+              <div>
+                <label for="edit-unidadesPorBlister">Tabletas por blíster</label>
+                <input id="edit-unidadesPorBlister" name="unidadesPorBlister" type="number" min="1" step="1" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <label for="edit-presentacion">Presentación</label>
+        <input id="edit-presentacion" name="presentacion" type="text" maxlength="40" required />
+        <div class="other-units-field" hidden>
+          <label for="edit-unidadesPorPaquete">Unidades por presentación</label>
+          <input id="edit-unidadesPorPaquete" name="unidadesPorPaquete" type="number" min="1" step="1" />
+        </div>
+        <div class="field-row">
+          <div>
+            <label for="edit-precio">Precio por presentación (S/)</label>
+            <input id="edit-precio" name="precio" type="number" min="0.01" step="0.01" required />
+          </div>
+          <div>
+            <label for="edit-stock">Presentaciones en stock</label>
+            <input id="edit-stock" name="stock" type="number" min="0" step="1" required />
+          </div>
+        </div>
+        <label for="edit-stockMinimo">Avisarme cuando queden</label>
+        <input id="edit-stockMinimo" name="stockMinimo" type="number" min="0" step="1" required />
+        <p id="mensaje-editar" class="message" role="status" aria-live="polite"></p>
+        <button class="primary-button" type="submit">Guardar cambios</button>
+      </form>
+    </dialog>
+
+    <dialog id="stock-dialog" class="dialog-panel stock-dialog">
+      <div class="panel-heading">
+        <div>
+          <p class="eyebrow">REPOSICIÓN</p>
+          <h2>Agregar stock</h2>
+        </div>
+        <button class="icon-button" type="button" data-cerrar-dialog aria-label="Cerrar">×</button>
+      </div>
+      <p id="stock-producto" class="form-intro"></p>
+      <form id="form-stock">
+        <input name="id" type="hidden" />
+        <label for="cantidad-stock">Cantidad de presentaciones que ingresan</label>
+        <input id="cantidad-stock" name="cantidad" type="number" min="1" step="1" value="1" required />
+        <p id="mensaje-stock" class="message" role="status" aria-live="polite"></p>
+        <button class="primary-button" type="submit">Agregar al inventario</button>
+      </form>
+    </dialog>
+    <div id="dialog-backdrop" class="dialog-backdrop" hidden></div>
+  </body>
+</html>
